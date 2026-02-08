@@ -530,8 +530,8 @@
 
                         <div class="computer-info">
                             <div class="info-row">
-                                <span class="info-label">IP Virtual:</span>
-                                <span class="info-value">${this.ip}</span>
+                                <span class="info-label">Site:</span>
+                                <span class="info-value">facebook.com/pt_BR</span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label">Localização:</span>
@@ -594,7 +594,7 @@
                 alert('⚠️ Por favor, inicie o perfil primeiro!');
                 return;
             }
-            alert(`🌐 Abrindo Facebook para ${pc.profileName}\n\nIP: ${pc.ip}\nLocalização: ${pc.location.city}, ${pc.location.state}`);
+            window.open('https://www.facebook.com/?locale=pt_BR', '_blank');
         }
 
         function resetComputer(id) {
