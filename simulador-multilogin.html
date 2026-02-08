@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilogin - Gerenciador de Perfis Facebook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-purple: #bf00ff;
+            --neon-green: #00ff88;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050508;
+            --card-bg: rgba(20, 20, 35, 0.95);
+            --text-primary: #e0e0e8;
+            --text-secondary: #9999aa;
+            --accent-gradient: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0 40px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: var(--card-bg);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--neon-cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-purple {
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+        }
+
+        .btn-purple:hover {
+            background: var(--neon-purple);
+            box-shadow: 0 0 20px rgba(191, 0, 255, 0.5);
+        }
+
+        .btn-green {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        .btn-green:hover {
+            background: var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .computers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .computer {
+            background: var(--card-bg);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .computer:nth-child(1) { animation-delay: 0.05s; }
+        .computer:nth-child(2) { animation-delay: 0.1s; }
+        .computer:nth-child(3) { animation-delay: 0.15s; }
+        .computer:nth-child(4) { animation-delay: 0.2s; }
+        .computer:nth-child(5) { animation-delay: 0.25s; }
+        .computer:nth-child(6) { animation-delay: 0.3s; }
+        .computer:nth-child(7) { animation-delay: 0.35s; }
+        .computer:nth-child(8) { animation-delay: 0.4s; }
+        .computer:nth-child(9) { animation-delay: 0.45s; }
+        .computer:nth-child(10) { animation-delay: 0.5s; }
+
+        .computer.active {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .computer.inactive {
+            border-color: rgba(255, 255, 255, 0.1);
+            opacity: 0.6;
+        }
+
+        .computer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .computer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .computer-id {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--neon-cyan);
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+
+        .status-inactive {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .computer-screen {
+            background: var(--darker-bg);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .fb-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            filter: grayscale(100%);
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        .computer.active .fb-icon {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+
+        .profile-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--neon-cyan);
+            margin-bottom: 5px;
+        }
+
+        .profile-id {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .computer-info {
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+        }
+
+        .computer-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .action-btn:hover {
+            background: var(--neon-cyan);
+            color: var(--dark-bg);
+        }
+
+        .action-btn-danger {
+            border-color: #ff0055;
+            color: #ff0055;
+            background: rgba(255, 0, 85, 0.1);
+        }
+
+        .action-btn-danger:hover {
+            background: #ff0055;
+            color: white;
+        }
+
+        .stats {
+            background: var(--card-bg);
+            border: 2px solid rgba(191, 0, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .stats-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--neon-purple);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(191, 0, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(191, 0, 255, 0.3);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-purple);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .computers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">MULTILOGIN MANAGER</div>
+            <div class="subtitle">Gerenciador de 10 Perfis Facebook</div>
+        </header>
+
+        <div class="controls">
+            <button class="btn" onclick="startAllProfiles()">🚀 Iniciar Todos</button>
+            <button class="btn btn-purple" onclick="stopAllProfiles()">⏹️ Parar Todos</button>
+            <button class="btn btn-green" onclick="randomizeAll()">🔄 Randomizar IPs</button>
+        </div>
+
+        <div class="computers-grid" id="computersGrid"></div>
+
+        <div class="stats">
+            <div class="stats-title">ESTATÍSTICAS DO SISTEMA</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="activeCount">0</div>
+                    <div class="stat-label">Perfis Ativos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="inactiveCount">10</div>
+                    <div class="stat-label">Perfis Inativos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="uniqueIPs">10</div>
+                    <div class="stat-label">IPs Únicos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">100%</div>
+                    <div class="stat-label">Isolamento</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/121.0',
+            'Mozilla/5.0 (X11; Linux x86_64) Chrome/120.0.0.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0',
+            'Mozilla/5.0 (Windows NT 11.0; Win64; x64) Edge/120.0.0.0',
+            'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) Safari/605.1.15',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) Safari/604.1',
+            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64) Firefox/121.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Opera/106.0.0.0'
+        ];
+
+        const locations = [
+            { city: 'São Paulo', state: 'SP', country: 'Brasil' },
+            { city: 'Rio de Janeiro', state: 'RJ', country: 'Brasil' },
+            { city: 'Belo Horizonte', state: 'MG', country: 'Brasil' },
+            { city: 'Curitiba', state: 'PR', country: 'Brasil' },
+            { city: 'Porto Alegre', state: 'RS', country: 'Brasil' },
+            { city: 'Brasília', state: 'DF', country: 'Brasil' },
+            { city: 'Salvador', state: 'BA', country: 'Brasil' },
+            { city: 'Fortaleza', state: 'CE', country: 'Brasil' },
+            { city: 'Recife', state: 'PE', country: 'Brasil' },
+            { city: 'Manaus', state: 'AM', country: 'Brasil' }
+        ];
+
+        class VirtualComputer {
+            constructor(id) {
+                this.id = id;
+                this.active = false;
+                this.ip = this.generateIP();
+                this.fingerprint = this.generateFingerprint();
+                this.userAgent = userAgents[id - 1];
+                this.location = locations[id - 1];
+                this.profileName = `Perfil FB ${id}`;
+                this.profileId = `fb_${Math.random().toString(36).substr(2, 9)}`;
+            }
+
+            generateIP() {
+                return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+            }
+
+            generateFingerprint() {
+                return Array.from({length: 32}, () => 
+                    Math.floor(Math.random() * 16).toString(16)
+                ).join('').toUpperCase();
+            }
+
+            randomizeIP() {
+                this.ip = this.generateIP();
+            }
+
+            toggle() {
+                this.active = !this.active;
+            }
+
+            render() {
+                return `
+                    <div class="computer ${this.active ? 'active' : 'inactive'}">
+                        <div class="computer-header">
+                            <div class="computer-id">PC-${String(this.id).padStart(2, '0')}</div>
+                            <div class="status-badge ${this.active ? 'status-active' : 'status-inactive'}">
+                                ${this.active ? '● Online' : '○ Offline'}
+                            </div>
+                        </div>
+                        
+                        <div class="computer-screen">
+                            <div class="screen-content">
+                                <div class="fb-icon">📘</div>
+                                ${this.active ? `
+                                    <div class="profile-name">${this.profileName}</div>
+                                    <div class="profile-id">${this.profileId}</div>
+                                ` : `
+                                    <div class="loading">Sistema em Espera...</div>
+                                `}
+                            </div>
+                        </div>
+
+                        <div class="computer-info">
+                            <div class="info-row">
+                                <span class="info-label">IP Virtual:</span>
+                                <span class="info-value">${this.ip}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Localização:</span>
+                                <span class="info-value">${this.location.city}, ${this.location.state}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Fingerprint:</span>
+                                <span class="info-value">${this.fingerprint.substr(0, 16)}...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">User-Agent:</span>
+                                <span class="info-value">${this.userAgent.substr(0, 30)}...</span>
+                            </div>
+                        </div>
+
+                        <div class="computer-actions">
+                            <button class="action-btn" onclick="toggleComputer(${this.id})">
+                                ${this.active ? '⏸️ Pausar' : '▶️ Iniciar'}
+                            </button>
+                            <button class="action-btn" onclick="randomizeIP(${this.id})">
+                                🔄 Novo IP
+                            </button>
+                            <button class="action-btn" onclick="openProfile(${this.id})">
+                                🌐 Abrir FB
+                            </button>
+                            <button class="action-btn action-btn-danger" onclick="resetComputer(${this.id})">
+                                🗑️ Resetar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize 10 computers
+        let computers = [];
+        for (let i = 1; i <= 10; i++) {
+            computers.push(new VirtualComputer(i));
+        }
+
+        function renderComputers() {
+            const grid = document.getElementById('computersGrid');
+            grid.innerHTML = computers.map(pc => pc.render()).join('');
+            updateStats();
+        }
+
+        function toggleComputer(id) {
+            computers[id - 1].toggle();
+            renderComputers();
+        }
+
+        function randomizeIP(id) {
+            computers[id - 1].randomizeIP();
+            renderComputers();
+        }
+
+        function openProfile(id) {
+            const pc = computers[id - 1];
+            if (!pc.active) {
+                alert('⚠️ Por favor, inicie o perfil primeiro!');
+                return;
+            }
+            alert(`🌐 Abrindo Facebook para ${pc.profileName}\n\nIP: ${pc.ip}\nLocalização: ${pc.location.city}, ${pc.location.state}`);
+        }
+
+        function resetComputer(id) {
+            if (confirm(`Deseja resetar o PC-${String(id).padStart(2, '0')}?`)) {
+                computers[id - 1] = new VirtualComputer(id);
+                renderComputers();
+            }
+        }
+
+        function startAllProfiles() {
+            computers.forEach(pc => pc.active = true);
+            renderComputers();
+        }
+
+        function stopAllProfiles() {
+            computers.forEach(pc => pc.active = false);
+            renderComputers();
+        }
+
+        function randomizeAll() {
+            computers.forEach(pc => pc.randomizeIP());
+            renderComputers();
+        }
+
+        function updateStats() {
+            const activeCount = computers.filter(pc => pc.active).length;
+            document.getElementById('activeCount').textContent = activeCount;
+            document.getElementById('inactiveCount').textContent = 10 - activeCount;
+            
+            const uniqueIPs = new Set(computers.map(pc => pc.ip)).size;
+            document.getElementById('uniqueIPs').textContent = uniqueIPs;
+        }
+
+        // Initial render
+        renderComputers();
+    </script>
+</body>
+</html>
